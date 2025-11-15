@@ -99,3 +99,74 @@ def register_crash_routes(app: FastAPI):
         except:
             log(traceback_block(), level="ERROR")
             raise
+
+    @app.get("/crash/network-timeout")
+    def crash_network_timeout():
+        import requests
+        try:
+            requests.get("https://10.255.255.1", timeout=0.001)
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+
+
+    @app.get("/crash/json-decode")
+    def crash_json_decode():
+        import json
+        try:
+            json.loads("{bad json}")
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+
+
+    @app.get("/crash/db-operational")
+    def crash_db_operational():
+        import sqlite3
+        try:
+            conn = sqlite3.connect(":memory:")
+            conn.execute("SELECT * FROM missing_table")
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+
+
+    @app.get("/crash/permission-denied")
+    def crash_permission():
+        try:
+            with open("/root/secret.txt", "w") as f:
+                f.write("denied")
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+
+
+    @app.get("/crash/memory-error")
+    def crash_memory():
+        try:
+            x = "x" * (10**9)
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+
+
+    @app.get("/crash/data-validation")
+    def crash_data_validation():
+        try:
+            data = {"name": None, "age": -5}
+            if data["age"] < 0:
+                raise ValueError("Age cannot be negative")
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+
+
+    @app.get("/crash/recursion")
+    def crash_recursion():
+        try:
+            def recurse(): return recurse()
+            recurse()
+        except Exception as e:
+            log(str(e), level="ERROR")
+            raise
+

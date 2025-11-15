@@ -2,10 +2,6 @@ from fastapi import FastAPI
 from utils.logger import log
 from utils.traceback_utils import traceback_block
 
-# -----------------------------
-# Deprecation Trigger Functions
-# -----------------------------
-
 def trigger_numpy_deprecation():
     import numpy as np
     try:

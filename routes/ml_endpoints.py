@@ -81,7 +81,7 @@ def register_ml_routes(app: FastAPI):
             raise
 
 
-    @app.get("/ml/tensorflow-load")
+    @app.get("/ml/tensorflow-lo ad")
     def ml_tf_load():
         # mhmd: ensure serving layers surface missing SavedModel exports
         try:
@@ -89,4 +89,101 @@ def register_ml_routes(app: FastAPI):
             tf.saved_model.load("non-existent-export")
         except:
             log(traceback_block(), level="ERROR")
+            raise
+
+    @app.get("/ml/torch-cuda-oom")
+    def ml_torch_oom():
+        import torch
+        try:
+            # simulate out-of-memory
+            torch.empty((10**9, 10**9), device="cuda")
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/torch-gradient")
+    def ml_torch_grad():
+        import torch
+        try:
+            x = torch.tensor([1.0], requires_grad=False)
+            y = x * 2
+            y.backward()  # RuntimeError: element 0 does not require grad
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/tensorflow-oom")
+    def ml_tf_oom():
+        import tensorflow as tf
+        try:
+            x = tf.random.uniform((10_000, 10_000, 1000))
+            y = tf.matmul(x, x)
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/model-load-fail")
+    def ml_model_load_fail():
+        import torch
+        try:
+            torch.load("non_existent_checkpoint.pt")
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/onnx-runtime-error")
+    def ml_onnx_runtime():
+        try:
+            import onnxruntime as ort
+            sess = ort.InferenceSession("non_existent_model.onnx")
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/tokenizer-error")
+    def ml_tokenizer_error():
+        from transformers import AutoTokenizer
+        try:
+            tokenizer = AutoTokenizer.from_pretrained("nonexistent-model-123")
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/huggingface-weight-mismatch")
+    def ml_hf_weight_mismatch():
+        from transformers import BertModel
+        try:
+            model = BertModel.from_pretrained("bert-base-uncased")
+            wrong_state = {"unexpected_key": 42}
+            model.load_state_dict(wrong_state)
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/data-shape-mismatch")
+    def ml_data_shape_mismatch():
+        import numpy as np
+        try:
+            X = np.random.rand(100, 5)
+            y = np.random.rand(99)  # off by one
+            from sklearn.linear_model import LinearRegression
+            LinearRegression().fit(X, y)
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
+            raise
+
+
+    @app.get("/ml/distributed-nccl-error")
+    def ml_nccl_error():
+        try:
+            raise RuntimeError("NCCL error in: ../torch/lib/c10d/ProcessGroupNCCL.cpp:912, unhandled system error")
+        except Exception as e:
+            log(str(e).replace("Traceback (most recent call last):", ""), level="ERROR")
             raise
