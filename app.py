@@ -3,7 +3,7 @@ import threading
 from utils.logger import log
 from routes.crash_endpoints import register_crash_routes
 from routes.ml_endpoints import register_ml_routes
-from routes.deprecation_triggers import register_deprecation_routes
+from routes.triggers import register_routes
 from routes.ai_endpoints import register_ai_routes
 
 app = FastAPI()
@@ -16,5 +16,5 @@ def startup_event():
 
 register_crash_routes(app)
 register_ml_routes(app)
-register_deprecation_routes(app)
+register_routes(app)
 register_ai_routes(app)
