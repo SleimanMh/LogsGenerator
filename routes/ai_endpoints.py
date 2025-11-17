@@ -3,6 +3,7 @@ from utils.logger import log
 import traceback
 from routes.ai_pipeline import AIPipeline
 
+
 def clean_traceback():
     tb = "".join(traceback.format_exc())
     return tb.replace("Traceback (most recent call last):", "").strip()
@@ -10,21 +11,21 @@ def clean_traceback():
 
 def register_ai_routes(app: FastAPI):
 
-    @app.get("/ai/pipeline-preprocessing-mismatch")
-    def ai_pipeline_preprocessing():
+    # ------------------------------------------------------
+    #  EXISTING AI ERRORS (renamed for uniformity)
+    # ------------------------------------------------------
+
+    def e_ai_01():
         import pandas as pd
         try:
             df = pd.DataFrame({"age": [25, 32, None], "city": ["Beirut", "Paris", "Berlin"]})
-            df["age"] = df["age"].astype(str)  # mixed dtype
+            df["age"] = df["age"].astype(str)  # force mixed dtype
             from sklearn.preprocessing import StandardScaler
-            scaler = StandardScaler()
-            scaler.fit_transform(df)
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+            StandardScaler().fit_transform(df)
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/feature-missing-column")
-    def ai_missing_column():
+    def e_ai_02():
         import pandas as pd
         try:
             expected = ["feature1", "feature2", "feature3"]
@@ -32,48 +33,34 @@ def register_ai_routes(app: FastAPI):
             for col in expected:
                 if col not in incoming.columns:
                     raise KeyError(f"Missing required feature column: '{col}'")
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/feature-wrong-dtype")
-    def ai_wrong_dtype():
+    def e_ai_03():
         import numpy as np
         try:
             X = np.array([["one", "two"], ["three", "four"]])
             from sklearn.linear_model import LinearRegression
-            model = LinearRegression()
-            model.fit(X, [1, 2])
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+            LinearRegression().fit(X, [1, 2])
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/deploy-missing-signature")
-    def ai_deploy_missing_signature():
-        try:
-            raise ValueError("Model signature mismatch: expected 12 features, got 10")
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+    def e_ai_04():
+        try: raise ValueError("Model signature mismatch: expected 12 features, got 10")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/deploy-runtime-incompatible")
-    def ai_deploy_runtime_incompatible():
-        try:
-            raise RuntimeError("Incompatible runtime: model requires torch==2.1.0 but found torch==1.9.0")
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+    def e_ai_05():
+        try: raise RuntimeError("Incompatible runtime: model requires torch==2.1.0 but found torch==1.9.0")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/monitoring-drift-detected")
-    def ai_monitoring_drift():
-        try:
-            raise ValueError("Feature distribution drift detected for 'transaction_amount' (p=0.001 < 0.05)")
-        except Exception:
-            log(clean_traceback(), level="WARNING")
-            raise
+    def e_ai_06():
+        try: raise ValueError("Feature distribution drift detected for 'transaction_amount' (p=0.001 < 0.05)")
+        except:
+            log(clean_traceback(), level="WARNING"); raise
 
-    @app.get("/ai/nn-malformed")
-    def ai_nn_malformed():
+    def e_ai_07():
         import torch
         from torch import nn
         try:
@@ -84,147 +71,261 @@ def register_ai_routes(app: FastAPI):
             )
             x = torch.randn(1, 128)
             model(x)
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/nn-invalid-input-size")
-    def ai_nn_input_size():
+    def e_ai_08():
         import tensorflow as tf
         try:
             model = tf.keras.Sequential([
                 tf.keras.layers.Dense(16, input_shape=(10,)),
                 tf.keras.layers.Dense(4)
             ])
-            x = tf.random.uniform((1, 8))
-            model(x)
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+            model(tf.random.uniform((1, 8)))
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/nn-weight-mismatch")
-    def ai_nn_weight_mismatch():
+    def e_ai_09():
         import torch
         from torch import nn
         try:
             model = nn.Linear(10, 2)
-            fake_state = {"weight": torch.rand((3, 3)), "bias": torch.rand(4)}
-            model.load_state_dict(fake_state)
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+            bogus = {"weight": torch.rand((3, 3)), "bias": torch.rand(4)}
+            model.load_state_dict(bogus)
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/nn-gradient-error")
-    def ai_gradient_error():
+    def e_ai_10():
         import torch
         try:
             x = torch.tensor([1.0], requires_grad=False)
-            y = x * 2
-            y.backward()
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+            (x * 2).backward()
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/nn-loss-nan")
-    def ai_loss_nan():
+    def e_ai_11():
         import torch
         from torch import nn
         try:
-            loss_fn = nn.MSELoss()
-            pred = torch.tensor([float('nan')])
+            pred = torch.tensor([float("nan")])
             target = torch.tensor([1.0])
-            loss = loss_fn(pred, target)
+            loss = nn.MSELoss()(pred, target)
             if torch.isnan(loss):
-                raise ValueError("Loss value became NaN during training")
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+                raise ValueError("Loss became NaN")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/model-load-fail")
-    def ai_model_load_fail():
+    def e_ai_12():
         import torch
-        try:
-            torch.load("non_existent_checkpoint.pt")
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+        try: torch.load("non_existent_checkpoint.pt")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/tokenizer-error")
-    def ai_tokenizer_error():
+    def e_ai_13():
         from transformers import AutoTokenizer
-        try:
-            AutoTokenizer.from_pretrained("nonexistent-model-123")
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+        try: AutoTokenizer.from_pretrained("nonexistent-model-123")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/huggingface-weight-mismatch")
-    def ai_hf_weight_mismatch():
+    def e_ai_14():
         from transformers import BertModel
         try:
             model = BertModel.from_pretrained("bert-base-uncased")
-            wrong_state = {"unexpected_key": 42}
-            model.load_state_dict(wrong_state)
-        except Exception:
-            log(clean_traceback(), level="ERROR")
-            raise
+            wrong = {"unexpected_key": 42}
+            model.load_state_dict(wrong)
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-
-    @app.get("/ai/transformer-mismatch")
-    def ai_transformer():
+    def e_ai_15():
         try:
             from transformers import AutoModelForSequenceClassification, AutoTokenizer
             import torch
             model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
             tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-            inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
-            outputs = model(**inputs, labels=torch.tensor([1]))  # Incorrect label shape
+            inputs = tokenizer("Hello", return_tensors="pt")
+            model(**inputs, labels=torch.tensor([1]))  # wrong labels shape
         except:
-            log(clean_traceback(), level="ERROR")
-            raise
+            log(clean_traceback(), level="ERROR"); raise
 
-
-    @app.get("/ai/gpt-error")
-    def ai_gpt():
+    def e_ai_16():
         try:
             from openai import OpenAI
             client = OpenAI()
-            response = client.chat.completions.create(
+            client.chat.completions.create(
                 model="gpt-4",
-                messages=[
-                    {"role": "user", "content": "Hello!"}
-                ],
-                max_tokens=-5  # Invalid parameter
+                messages=[{"role": "user", "content": "Hello!"}],
+                max_tokens=-5
             )
         except:
-            log(clean_traceback(), level="ERROR")
-            raise
+            log(clean_traceback(), level="ERROR"); raise
 
-    @app.get("/ai/run-pipeline")
-    def run_pipeline(
-        kaggle_link: str = "https://www.kaggle.com/datasets/codebreaker619/salary-data-with-age-and-experience"
-    ):
-        """
-        Run the AI pipeline using the given Kaggle dataset link.
-        Example:
-        GET /ai/run-pipeline?kaggle_link=https://www.kaggle.com/datasets/codebreaker619/salary-data-with-age-and-experience
-        """
+    # ------------------------------------------------------
+    #   ADD 20 NEW AI/ML REALISTIC ERRORS
+    # ------------------------------------------------------
+
+    def e_ai_17():
+        import numpy as np
+        try: np.linalg.inv(np.zeros((3,3)))
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_18():
+        import pandas as pd
         try:
-            # Extract the Kaggle dataset reference
-            parts = kaggle_link.split("/datasets/")[-1].split("/")
-            dataset_ref = (
-                parts[0] + "/" + parts[1]
-                if len(parts) > 1
-                else "codebreaker619/salary-data-with-age-and-experience"
-            )
+            df = pd.DataFrame({"x": ["a","b","c"]})
+            from sklearn.preprocessing import MinMaxScaler
+            MinMaxScaler().fit_transform(df)
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-            pipeline = AIPipeline(source="C:/Users/sleim/Downloads/archive/Employee_Salary_Dataset.csv")
-            pipeline.loader.dataset_ref = dataset_ref
-            pipeline.loader.file_name = "Employee_Salary_Dataset.csv"
-            pipeline.run_pipeline()
+    def e_ai_19():
+        import tensorflow as tf
+        try:
+            x = tf.random.uniform((2,3))
+            y = tf.random.uniform((4,5))
+            _ = tf.matmul(x,y)
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-            return {"status": "success", "dataset": dataset_ref}
+    def e_ai_20():
+        try:
+            import joblib
+            joblib.load("missing_model.pkl")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
 
-        except Exception as e:
-            log(str(e), level="ERROR")
-            return {"status": "error", "message": str(e)}
+    def e_ai_21():
+        try:
+            import torch
+            torch.nn.Linear(5,5)(torch.randn(10,3))  # wrong input dim
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_22():
+        import pandas as pd
+        try:
+            pd.read_csv("definitely_missing_file_abc123.csv")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_23():
+        import numpy as np
+        try:
+            arr = np.arange(5)
+            arr.reshape((3,3))
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_24():
+        import torch
+        try:
+            torch.zeros((10,10), device="cuda:50")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_25():
+        import pandas as pd
+        try:
+            df = pd.DataFrame({"a":[1,2,3], "b":["x","y","z"]})
+            from sklearn.impute import SimpleImputer
+            SimpleImputer(strategy="mean").fit_transform(df) # mean on strings
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_26():
+        import tensorflow as tf
+        try:
+            model = tf.keras.Sequential([tf.keras.layers.LSTM(4)])
+            model(tf.random.uniform((1,5)))  # missing time dimension
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_27():
+        import transformers
+        try:
+            tokenizer = transformers.AutoTokenizer.from_pretrained("bert-base-uncased")
+            tokenizer.pad_token = None
+            tokenizer(["a","b"], padding=True)
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_28():
+        import torch
+        try:
+            x = torch.randn((5,5), requires_grad=True)
+            y = x.detach()
+            y.backward(torch.ones_like(y))
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_29():
+        import numpy as np
+        try:
+            np.random.choice([])
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_30():
+        try:
+            from sklearn.tree import DecisionTreeClassifier
+            DecisionTreeClassifier(max_depth="not_a_number")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_31():
+        import tensorflow as tf
+        try:
+            tf.keras.models.load_model("missing_model_dir/")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_32():
+        import torch
+        try:
+            torch.save(torch.randn(10000000000000), "bigfile.pt")  # unrealistic object serialization
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_33():
+        import transformers
+        try:
+            transformers.AutoModel.from_pretrained("bert-base-uncased", revision="unknown_tag")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_34():
+        import pandas as pd
+        try:
+            df = pd.DataFrame({"x":[1,2,3]})
+            df["bad"] = df["x"].apply(lambda v: v["bad"])
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+    def e_ai_35():
+        try: raise RuntimeError("Pipeline step produced empty output; aborting pipeline.")
+        except:
+            log(clean_traceback(), level="ERROR"); raise
+
+
+    # ------------------------------------------------------
+    #   FINAL ROUTE: RUN ALL AI EXCEPTIONS
+    # ------------------------------------------------------
+
+    @app.get("/ai/run-all")
+    def ai_run_all():
+
+        all_funcs = [
+            e_ai_01, e_ai_02, e_ai_03, e_ai_04, e_ai_05,
+            e_ai_06, e_ai_07, e_ai_08, e_ai_09, e_ai_10,
+            e_ai_11, e_ai_12, e_ai_13, e_ai_14, e_ai_15,
+            e_ai_16, e_ai_17, e_ai_18, e_ai_19, e_ai_20,
+            e_ai_21, e_ai_22, e_ai_23, e_ai_24, e_ai_25,
+            e_ai_26, e_ai_27, e_ai_28, e_ai_29, e_ai_30,
+            e_ai_31, e_ai_32, e_ai_33, e_ai_34, e_ai_35
+        ]
+
+        for fn in all_funcs:
+            try: fn()
+            except: pass
+
+        return {"status": "done", "executed": len(all_funcs)}
