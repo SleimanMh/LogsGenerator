@@ -439,3 +439,6 @@ def register_ai_routes(app: FastAPI):
         except Exception as e:
             log(str(e), level="ERROR")
             return {"status": "error", "message": str(e)}
+
+
+##fffffffffffffffffffffffff
