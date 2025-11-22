@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     log("[SYSTEM] Loading new modular error structure...")
     log("[SYSTEM] Python Errors: 100 (types, strings, I/O, arithmetic, iteration)")
     log("[SYSTEM] ML Errors: 100 (preprocessing, training, metrics, advanced)")
-    log("[SYSTEM] AI Errors: 100 (preprocessing, vision, embeddings, autograd, transformers)")
+    log("[SYSTEM] AI Errors: 200 (preprocessing, vision, embeddings, autograd, transformers + extended)")
     yield
     # Shutdown
     log("[SYSTEM] Application shutting down...")
@@ -37,7 +37,7 @@ app = FastAPI(lifespan=lifespan)
 # ============================================================
 register_python_errors(app)     # 100 Python language errors
 register_ml_errors(app)         # 100 Traditional ML errors (sklearn, xgboost, etc)
-register_ai_errors(app)         # 100 Deep learning AI errors (torch, tf, transformers)
+register_ai_errors(app)         # 200 Deep learning AI errors (torch, tf, transformers + extended)
 
 # ============================================================
 # Register Legacy Error Classes (Backward Compatibility)
@@ -59,13 +59,13 @@ def root():
         "endpoints": {
             "python_errors": "/python/run-all (100 errors)",
             "ml_errors": "/ml/run-all (100 errors)",
-            "ai_errors": "/ai/run-all (100 errors)",
+            "ai_errors": "/ai/run-all (200 errors)",
             "python_info": "/python/info",
             "ml_info": "/ml/info",
             "ai_info": "/ai/info",
             "category_errors": "/python/by-category/{types|strings|io|arithmetic|iteration}",
         },
-        "total_errors": 300,
+        "total_errors": 400,
         "classes": ["python", "ml", "ai"],
         "documentation": "See /docs for Swagger UI"
     }
@@ -106,8 +106,8 @@ def api_structure():
                     "count": 100
                 },
                 "ai": {
-                    "modules": ["preprocessing_errors", "vision_errors", "embeddings_errors", "autograd_errors", "transformers_errors"],
-                    "count": 100
+                    "modules": ["preprocessing_errors", "vision_errors", "embeddings_errors", "autograd_errors", "transformers_errors", "nextgen_errors"],
+                    "count": 200
                 }
             }
         },
