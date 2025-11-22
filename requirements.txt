@@ -2,15 +2,10 @@ fastapi
 uvicorn
 numpy
 pandas
-torch
 scikit-learn
-tensorflow
-transformers
-torchvision
 kaggle
 xgboost
-lightgbm
-imblearn
 scipy
 requests
 pyyaml 
+streamlit

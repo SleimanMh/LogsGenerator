@@ -10,7 +10,7 @@ from typing import Dict, List
 import pandas as pd
 
 # Configuration
-API_BASE_URL = "http://localhost:9000"
+API_BASE_URL = "http://api:8000"
 
 st.set_page_config(
     page_title="Error Dataset Generator",
