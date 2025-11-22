@@ -1,6 +1,6 @@
 
 """
-AI Error Endpoints - 200 Deep Learning/AI Errors
+AI Error Endpoints - 220 Deep Learning/AI Errors
 Covers: PyTorch, TensorFlow, Transformers, Computer Vision, NLP, RNNs, etc.
 
 Organization:
@@ -10,6 +10,7 @@ Organization:
   - autograd_errors: Autograd and RNN (e_ai_61-80)
   - transformers_errors: Transformers and advanced (e_ai_81-100)
   - nextgen_errors: Extended versions across all categories (e_ai_101-200)
+  - error_propagation: Multi-layer propagation scenarios (e_ai_201-220)
 
 API Endpoints:
   - GET /ai/preprocessing (40 errors)
@@ -17,6 +18,7 @@ API Endpoints:
   - GET /ai/embeddings (40 errors)
   - GET /ai/autograd (40 errors)
   - GET /ai/transformers (40 errors)
+  - GET /ai/propagation (20 errors)
 """
 
 from fastapi import FastAPI
@@ -30,6 +32,7 @@ from . import embeddings_errors
 from . import autograd_errors
 from . import transformers_errors
 from . import nextgen_errors
+from . import error_propagation
 
 
 AI_ERRORS = {}
@@ -40,6 +43,7 @@ MODULES = [
     autograd_errors,
     transformers_errors,
     nextgen_errors,
+    error_propagation,
 ]
 
 for module in MODULES:
@@ -54,6 +58,7 @@ CATEGORY_RANGES = {
     "embeddings": [(41, 60), (141, 160)],
     "autograd": [(61, 80), (161, 180)],
     "transformers": [(81, 100), (181, 200)],
+    "propagation": [(201, 220)],
 }
 
 
@@ -107,6 +112,7 @@ def register_ai_errors(app: FastAPI):
     embeddings_dict = _select_errors(CATEGORY_RANGES["embeddings"])
     autograd_dict = _select_errors(CATEGORY_RANGES["autograd"])
     transformers_dict = _select_errors(CATEGORY_RANGES["transformers"])
+    propagation_dict = _select_errors(CATEGORY_RANGES["propagation"])
 
     @app.get("/ai/preprocessing")
     def ai_preprocessing():
@@ -132,6 +138,11 @@ def register_ai_errors(app: FastAPI):
     def ai_transformers():
         """Execute AI transformer errors (e_ai_81-100 + e_ai_181-200)"""
         return _run_error_category(transformers_dict, "transformers")
+
+    @app.get("/ai/propagation")
+    def ai_propagation():
+        """Execute AI propagation errors (e_ai_201-220)"""
+        return _run_error_category(propagation_dict, "propagation")
 
     @app.get("/ai/run-all")
     def ai_run_all():
@@ -171,6 +182,7 @@ def register_ai_errors(app: FastAPI):
                 "/ai/embeddings": len(embeddings_dict),
                 "/ai/autograd": len(autograd_dict),
                 "/ai/transformers": len(transformers_dict),
+                "/ai/propagation": len(propagation_dict),
                 "/ai/run-all": len(AI_ERRORS)
             }
         }
