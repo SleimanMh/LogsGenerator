@@ -1,59 +1,75 @@
 """
-ML Error Endpoints - 100+ Machine Learning Errors
-Covers: scikit-learn, XGBoost, LightGBM, ensemble methods, preprocessing,
-validation, metrics, and traditional ML operations
+ML Error Endpoints - 180+ Machine Learning Errors
+Covers: scikit-learn, XGBoost, LightGBM, TensorFlow, PyTorch Lightning,
+imbalanced-learn, and production ML workflows.
 
 Organization:
   - preprocessing_errors: Data handling and preprocessing (ml_err_01-30)
   - training_errors: Model training and fitting (ml_err_31-60)
   - metrics_errors: Metrics and evaluation (ml_err_61-85)
   - advanced_errors: Advanced and complex scenarios (ml_err_86-100)
+  - nextgen_errors: Extended scenarios across all categories (ml_err_101-180)
 
 API Endpoints:
-  - GET /ml/preprocessing (30 errors)
-  - GET /ml/training (30 errors)
-  - GET /ml/metrics (25 errors)
-  - GET /ml/advanced (15 errors)
+  - GET /ml/preprocessing (50 errors)
+  - GET /ml/training (50 errors)
+  - GET /ml/metrics (45 errors)
+  - GET /ml/advanced (35 errors)
 """
 
 from fastapi import FastAPI
 from utils.logger import log
 import traceback
 
-# Import ML error modules
 from . import preprocessing_errors
 from . import training_errors
 from . import metrics_errors
 from . import advanced_errors
+from . import nextgen_errors
 
 
-# -------------------------------------------------------------------
-# Helper: Extract integer error index from function name safely
-# ml_err_XX → XX (int)
-# -------------------------------------------------------------------
-def _err_id(name: str) -> int:
-    """Extract error index from 'ml_err_XX' safely."""
-    try:
-        return int(name.replace("ml_err_", ""))
-    except ValueError:
-        return -1  # invalid names won't be included
+MODULES = [
+    preprocessing_errors,
+    training_errors,
+    metrics_errors,
+    advanced_errors,
+    nextgen_errors,
+]
 
-
-# Collect all ML error functions dynamically
 ML_ERRORS = {}
-
-for module in [preprocessing_errors, training_errors, metrics_errors, advanced_errors]:
+for module in MODULES:
     for attr in dir(module):
         if attr.startswith("ml_err_"):
             ML_ERRORS[attr] = getattr(module, attr)
 
 
-# -------------------------------------------------------------------
-# Execute an error category and return structured results
-# -------------------------------------------------------------------
+CATEGORY_RANGES = {
+    "preprocessing": [(1, 30), (101, 120)],
+    "training": [(31, 60), (121, 140)],
+    "metrics": [(61, 85), (141, 160)],
+    "advanced": [(86, 100), (161, 180)],
+}
+
+
+def _err_id(name: str) -> int:
+    try:
+        return int(name.replace("ml_err_", ""))
+    except ValueError:
+        return -1
+
+
+def _select_errors(range_pairs):
+    selected = {}
+    for name, func in ML_ERRORS.items():
+        idx = _err_id(name)
+        if any(start <= idx <= end for start, end in range_pairs):
+            selected[name] = func
+    return selected
+
+
 def _run_error_category(errors_dict: dict, category_name: str) -> dict:
     results = {"category": category_name, "total": len(errors_dict), "errors": []}
-    failed_count = 0
+    failed = 0
 
     for error_name, error_func in sorted(errors_dict.items()):
         try:
@@ -65,28 +81,19 @@ def _run_error_category(errors_dict: dict, category_name: str) -> dict:
             ).strip()
 
             log(f"[ERROR] {error_name}: {error_type}\n{tb_clean}")
+            results["errors"].append({"function": error_name, "type": error_type})
+            failed += 1
 
-            results["errors"].append({
-                "function": error_name,
-                "type": error_type
-            })
-            failed_count += 1
-
-    results["succeeded"] = len(errors_dict) - failed_count
-    results["failed"] = failed_count
+    results["succeeded"] = len(errors_dict) - failed
+    results["failed"] = failed
     return results
 
 
-# -------------------------------------------------------------------
-# Register endpoints
-# -------------------------------------------------------------------
 def register_ml_errors(app: FastAPI):
-
-    # Correct category division
-    preprocessing_dict = {k: v for k, v in ML_ERRORS.items() if 1 <= _err_id(k) <= 30}
-    training_dict      = {k: v for k, v in ML_ERRORS.items() if 31 <= _err_id(k) <= 60}
-    metrics_dict       = {k: v for k, v in ML_ERRORS.items() if 61 <= _err_id(k) <= 85}
-    advanced_dict      = {k: v for k, v in ML_ERRORS.items() if 86 <= _err_id(k) <= 100}
+    preprocessing_dict = _select_errors(CATEGORY_RANGES["preprocessing"])
+    training_dict = _select_errors(CATEGORY_RANGES["training"])
+    metrics_dict = _select_errors(CATEGORY_RANGES["metrics"])
+    advanced_dict = _select_errors(CATEGORY_RANGES["advanced"])
 
     @app.get("/ml/preprocessing")
     def ml_preprocessing():
@@ -132,12 +139,12 @@ def register_ml_errors(app: FastAPI):
             "class": "ml",
             "total_errors": len(ML_ERRORS),
             "endpoints": {
-                "/ml/preprocessing": 30,
-                "/ml/training": 30,
-                "/ml/metrics": 25,
-                "/ml/advanced": 15,
-                "/ml/run-all": 100
-            }
+                "/ml/preprocessing": len(preprocessing_dict),
+                "/ml/training": len(training_dict),
+                "/ml/metrics": len(metrics_dict),
+                "/ml/advanced": len(advanced_dict),
+                "/ml/run-all": len(ML_ERRORS),
+            },
         }
 
 

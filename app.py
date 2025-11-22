@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     log("[SYSTEM] Application starting up...")
     log("[SYSTEM] Loading new modular error structure...")
     log("[SYSTEM] Python Errors: 100 (types, strings, I/O, arithmetic, iteration)")
-    log("[SYSTEM] ML Errors: 100 (preprocessing, training, metrics, advanced)")
+    log("[SYSTEM] ML Errors: 180 (preprocessing, training, metrics, advanced + extended)")
     log("[SYSTEM] AI Errors: 220 (preprocessing, vision, embeddings, autograd, transformers + propagation)")
     yield
     # Shutdown
@@ -36,7 +36,7 @@ app = FastAPI(lifespan=lifespan)
 # Register New Modular Error Classes
 # ============================================================
 register_python_errors(app)     # 100 Python language errors
-register_ml_errors(app)         # 100 Traditional ML errors (sklearn, xgboost, etc)
+register_ml_errors(app)         # 180 Traditional ML errors (sklearn, xgboost, etc)
 register_ai_errors(app)         # 220 Deep learning AI errors (torch, tf, transformers + propagation)
 
 # ============================================================
@@ -58,7 +58,7 @@ def root():
         "description": "Modular error generation system for 3-class ML classification",
         "endpoints": {
             "python_errors": "/python/run-all (100 errors)",
-            "ml_errors": "/ml/run-all (100 errors)",
+            "ml_errors": "/ml/run-all (180 errors)",
             "ai_errors": "/ai/run-all (220 errors)",
             "ai_propagation": "/ai/propagation (20 errors)",
             "python_info": "/python/info",
@@ -66,7 +66,7 @@ def root():
             "ai_info": "/ai/info",
             "category_errors": "/python/by-category/{types|strings|io|arithmetic|iteration}",
         },
-        "total_errors": 420,
+        "total_errors": 500,
         "classes": ["python", "ml", "ai"],
         "documentation": "See /docs for Swagger UI"
     }
@@ -103,8 +103,8 @@ def api_structure():
                     "count": 100
                 },
                 "ml": {
-                    "modules": ["preprocessing_errors", "training_errors", "metrics_errors", "advanced_errors"],
-                    "count": 100
+                    "modules": ["preprocessing_errors", "training_errors", "metrics_errors", "advanced_errors", "nextgen_errors"],
+                    "count": 180
                 },
                 "ai": {
                     "modules": ["preprocessing_errors", "vision_errors", "embeddings_errors", "autograd_errors", "transformers_errors", "nextgen_errors", "error_propagation"],
