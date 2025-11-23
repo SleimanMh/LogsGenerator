@@ -8,8 +8,9 @@ import requests
 import json
 from typing import Dict, List
 import pandas as pd
+import os
 
-# Configuration
+# Detect if running in Docker or locally
 API_BASE_URL = "http://api:8000"
 
 st.set_page_config(
@@ -38,7 +39,6 @@ endpoints_map = {
         "io": "/python/io",
         "arithmetic": "/python/arithmetic",
         "iteration": "/python/iteration",
-        "run-all": "/python/run-all",
         "info": "/python/info"
     },
     "ML": {
@@ -46,7 +46,8 @@ endpoints_map = {
         "training": "/ml/training",
         "metrics": "/ml/metrics",
         "advanced": "/ml/advanced",
-        "run-all": "/ml/run-all",
+        "nextgen": "/ml/nextgen",
+        "propagation": "/ml/propagation",
         "info": "/ml/info"
     },
     "AI": {
@@ -55,7 +56,8 @@ endpoints_map = {
         "embeddings": "/ai/embeddings",
         "autograd": "/ai/autograd",
         "transformers": "/ai/transformers",
-        "run-all": "/ai/run-all",
+        "propagation": "/ai/propagation",
+        "deeplearning": "/ai/deeplearning",
         "info": "/ai/info"
     }
 }
@@ -179,22 +181,25 @@ with doc_col1:
     """)
 
 with doc_col2:
-    st.markdown("### ML Errors (100)")
+    st.markdown("### ML Errors (200)")
     st.markdown("""
-- **Preprocessing** (30): Data handling
-- **Training** (30): Model fitting
-- **Metrics** (25): Evaluation errors
-- **Advanced** (15): Complex scenarios
+- **Preprocessing** (50): Data handling
+- **Training** (50): Model fitting
+- **Metrics** (45): Evaluation errors
+- **Advanced** (35): Complex scenarios
+- **Propagation** (20): Propagation errors                
     """)
 
 with doc_col3:
-    st.markdown("### AI Errors (100)")
+    st.markdown("### AI Errors (270)")
     st.markdown("""
-- **Preprocessing** (20): Tensor prep
-- **Vision** (20): CNN/CV errors
-- **Embeddings** (20): NLP/embedding
-- **Autograd** (20): Gradient/RNN
-- **Transformers** (20): Transformer arch
+- **Preprocessing** (40): Tensor prep
+- **Vision** (40): CNN/CV errors
+- **Embeddings** (40): NLP/embedding
+- **Autograd** (40): Gradient/RNN
+- **Transformers** (40): Transformer arch
+- **Propagation** (20): Error propagation
+- **DeepLearning** (50): PyTorch/TensorFlow                
     """)
 
 # Footer
@@ -202,6 +207,6 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #888;'>
 <p><strong>Error Classification Dataset Generator v2.0</strong></p>
-<p>300 total error scenarios across Python, ML, and AI frameworks</p>
+<p>570 total error scenarios across Python, ML, and AI frameworks</p>
 </div>
 """, unsafe_allow_html=True)

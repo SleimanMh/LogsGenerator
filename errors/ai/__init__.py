@@ -1,6 +1,6 @@
 
 """
-AI Error Endpoints - 220 Deep Learning/AI Errors
+AI Error Endpoints - 270 Deep Learning/AI Errors
 Covers: PyTorch, TensorFlow, Transformers, Computer Vision, NLP, RNNs, etc.
 
 Organization:
@@ -11,6 +11,7 @@ Organization:
   - transformers_errors: Transformers and advanced (e_ai_81-100)
   - nextgen_errors: Extended versions across all categories (e_ai_101-200)
   - error_propagation: Multi-layer propagation scenarios (e_ai_201-220)
+  - deeplearning_errors: PyTorch/TensorFlow specific errors (e_ai_221-270)
 
 API Endpoints:
   - GET /ai/preprocessing (40 errors)
@@ -19,6 +20,7 @@ API Endpoints:
   - GET /ai/autograd (40 errors)
   - GET /ai/transformers (40 errors)
   - GET /ai/propagation (20 errors)
+  - GET /ai/deeplearning (50 errors)
 """
 
 from fastapi import FastAPI
@@ -33,6 +35,7 @@ from . import autograd_errors
 from . import transformers_errors
 from . import nextgen_errors
 from . import error_propagation
+from . import deeplearning_errors
 
 
 AI_ERRORS = {}
@@ -44,6 +47,7 @@ MODULES = [
     transformers_errors,
     nextgen_errors,
     error_propagation,
+    deeplearning_errors,
 ]
 
 for module in MODULES:
@@ -59,12 +63,17 @@ CATEGORY_RANGES = {
     "autograd": [(61, 80), (161, 180)],
     "transformers": [(81, 100), (181, 200)],
     "propagation": [(201, 220)],
+    "deeplearning": [(221, 270)],
 }
 
 
 def _err_id(name: str) -> int:
+    """Extract numeric ID from error name (e.g., e_ai_001 -> 1)"""
     try:
-        return int(name.split('_')[2])
+        parts = name.split('_')
+        if len(parts) >= 3:
+            return int(parts[2])
+        return -1
     except (IndexError, ValueError):
         return -1
 
@@ -105,7 +114,7 @@ def _run_error_category(errors_dict: dict, category_name: str) -> dict:
 
 
 def register_ai_errors(app: FastAPI):
-    """Register AI error endpoints"""
+    """Register AI error endpoints with all categories"""
 
     preprocessing_dict = _select_errors(CATEGORY_RANGES["preprocessing"])
     vision_dict = _select_errors(CATEGORY_RANGES["vision"])
@@ -113,6 +122,7 @@ def register_ai_errors(app: FastAPI):
     autograd_dict = _select_errors(CATEGORY_RANGES["autograd"])
     transformers_dict = _select_errors(CATEGORY_RANGES["transformers"])
     propagation_dict = _select_errors(CATEGORY_RANGES["propagation"])
+    deeplearning_dict = _select_errors(CATEGORY_RANGES["deeplearning"])
 
     @app.get("/ai/preprocessing")
     def ai_preprocessing():
@@ -144,31 +154,10 @@ def register_ai_errors(app: FastAPI):
         """Execute AI propagation errors (e_ai_201-220)"""
         return _run_error_category(propagation_dict, "propagation")
 
-    @app.get("/ai/run-all")
-    def ai_run_all():
-        """Execute all AI error scenarios"""
-        results = {"total": len(AI_ERRORS), "errors": []}
-        failed_count = 0
-
-        for error_name, error_func in sorted(AI_ERRORS.items()):
-            try:
-                error_func()
-            except Exception as e:
-                error_type = type(e).__name__
-                tb = "".join(traceback.format_exc())
-                tb_clean = tb.replace("Traceback (most recent call last):", "").strip()
-
-                log(f"[ERROR] {error_name}: {error_type}\n{tb_clean}")
-                results["errors"].append({
-                    "function": error_name,
-                    "type": error_type
-                })
-                failed_count += 1
-
-        results["succeeded"] = len(AI_ERRORS) - failed_count
-        results["failed"] = failed_count
-
-        return results
+    @app.get("/ai/deeplearning")
+    def ai_deeplearning():
+        """Execute AI deeplearning errors (e_ai_221-270)"""
+        return _run_error_category(deeplearning_dict, "deeplearning")
 
     @app.get("/ai/info")
     def ai_info():
@@ -183,7 +172,7 @@ def register_ai_errors(app: FastAPI):
                 "/ai/autograd": len(autograd_dict),
                 "/ai/transformers": len(transformers_dict),
                 "/ai/propagation": len(propagation_dict),
-                "/ai/run-all": len(AI_ERRORS)
+                "/ai/deeplearning": len(deeplearning_dict)
             }
         }
 

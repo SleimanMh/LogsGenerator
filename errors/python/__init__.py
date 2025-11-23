@@ -116,32 +116,6 @@ def register_python_errors(app: FastAPI):
         """Execute 15 Python iteration and control flow errors (p_err_86-100)"""
         return _run_error_category(iteration_dict, "iteration")
     
-    @app.get("/python/run-all")
-    def python_run_all():
-        """Execute all 100 Python error scenarios"""
-        results = {"total": len(PYTHON_ERRORS), "errors": []}
-        failed_count = 0
-        
-        for error_name, error_func in sorted(PYTHON_ERRORS.items()):
-            try:
-                error_func()
-            except Exception as e:
-                error_type = type(e).__name__
-                tb = "".join(traceback.format_exc())
-                tb_clean = tb.replace("Traceback (most recent call last):", "").strip()
-                
-                log(f"[ERROR] {error_name}: {error_type}\n{tb_clean}")
-                results["errors"].append({
-                    "function": error_name,
-                    "type": error_type
-                })
-                failed_count += 1
-        
-        results["succeeded"] = len(PYTHON_ERRORS) - failed_count
-        results["failed"] = failed_count
-        
-        return results
-    
     @app.get("/python/info")
     def python_info():
         """Get Python errors information"""
@@ -153,8 +127,7 @@ def register_python_errors(app: FastAPI):
                 "/python/strings": 20,
                 "/python/io": 20,
                 "/python/arithmetic": 20,
-                "/python/iteration": 15,
-                "/python/run-all": 100
+                "/python/iteration": 15
             }
         }
 

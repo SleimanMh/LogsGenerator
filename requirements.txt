@@ -9,3 +9,6 @@ scipy
 requests
 pyyaml 
 streamlit
+python-dotenv
+lightgbm
+imbalanced-learn

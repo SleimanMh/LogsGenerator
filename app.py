@@ -3,50 +3,27 @@ from contextlib import asynccontextmanager
 import threading
 from utils.logger import log
 
-# Import new modular error classes
 from errors.python import register_python_errors
 from errors.ml import register_ml_errors
 from errors.ai import register_ai_errors
 
-# Import legacy error classes (for backward compatibility)
-from routes.crash_endpoints import register_crash_routes
-from routes.ml_endpoints import register_ml_routes
-from routes.triggers import register_routes
-from routes.ai_endpoints import register_ai_routes
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan event handler for startup/shutdown"""
-    # Startup
     log("[SYSTEM] Application starting up...")
     log("[SYSTEM] Loading new modular error structure...")
     log("[SYSTEM] Python Errors: 100 (types, strings, I/O, arithmetic, iteration)")
-    log("[SYSTEM] ML Errors: 180 (preprocessing, training, metrics, advanced + extended)")
-    log("[SYSTEM] AI Errors: 220 (preprocessing, vision, embeddings, autograd, transformers + propagation)")
+    log("[SYSTEM] ML Errors: 200 (preprocessing, training, metrics, advanced + nextgen + propagation)")
+    log("[SYSTEM] AI Errors: 270 (preprocessing, vision, embeddings, autograd, transformers + nextgen + propagation + deeplearning)")
     yield
-    # Shutdown
     log("[SYSTEM] Application shutting down...")
 
 
 app = FastAPI(lifespan=lifespan)
 
-
-# ============================================================
-# Register New Modular Error Classes
-# ============================================================
-register_python_errors(app)     # 100 Python language errors
-register_ml_errors(app)         # 180 Traditional ML errors (sklearn, xgboost, etc)
-register_ai_errors(app)         # 220 Deep learning AI errors (torch, tf, transformers + propagation)
-
-# ============================================================
-# Register Legacy Error Classes (Backward Compatibility)
-# ============================================================
-# Uncomment to enable legacy endpoints:
-# register_crash_routes(app)    # Legacy general errors
-# register_ml_routes(app)       # Legacy ML framework errors
-# register_routes(app)          # Legacy trigger scenarios
-# register_ai_endpoints(app)    # Legacy AI errors
+register_python_errors(app)
+register_ml_errors(app)    
+register_ai_errors(app)        
 
 
 @app.get("/")
@@ -57,16 +34,14 @@ def root():
         "version": "2.0",
         "description": "Modular error generation system for 3-class ML classification",
         "endpoints": {
-            "python_errors": "/python/run-all (100 errors)",
-            "ml_errors": "/ml/run-all (180 errors)",
-            "ai_errors": "/ai/run-all (220 errors)",
-            "ai_propagation": "/ai/propagation (20 errors)",
+            "python_errors": "100 errors (5 categories)",
+            "ml_errors": "200 errors (6 categories)",
+            "ai_errors": "270 errors (7 categories)",
             "python_info": "/python/info",
             "ml_info": "/ml/info",
-            "ai_info": "/ai/info",
-            "category_errors": "/python/by-category/{types|strings|io|arithmetic|iteration}",
+            "ai_info": "/ai/info"
         },
-        "total_errors": 500,
+        "total_errors": 570,
         "classes": ["python", "ml", "ai"],
         "documentation": "See /docs for Swagger UI"
     }
@@ -103,12 +78,12 @@ def api_structure():
                     "count": 100
                 },
                 "ml": {
-                    "modules": ["preprocessing_errors", "training_errors", "metrics_errors", "advanced_errors", "nextgen_errors"],
-                    "count": 180
+                    "modules": ["preprocessing_errors", "training_errors", "metrics_errors", "advanced_errors", "nextgen_errors", "propagation_errors"],
+                    "count": 200
                 },
                 "ai": {
-                    "modules": ["preprocessing_errors", "vision_errors", "embeddings_errors", "autograd_errors", "transformers_errors", "nextgen_errors", "error_propagation"],
-                    "count": 220
+                    "modules": ["preprocessing_errors", "vision_errors", "embeddings_errors", "autograd_errors", "transformers_errors", "nextgen_errors", "error_propagation", "deeplearning_errors"],
+                    "count": 270
                 }
             }
         },

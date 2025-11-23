@@ -11,6 +11,7 @@ services:
       - "8000:8000"
     volumes:
       - ./logs:/app/logs
+      - .:/app/ml_codebase
     environment:
       PYTHONUNBUFFERED: 1
     networks:
@@ -26,6 +27,7 @@ services:
       - "8501:8501"
     volumes:
       - ./logs:/app/logs
+      - .:/app/ml_codebase
     depends_on:
       - api
     environment:

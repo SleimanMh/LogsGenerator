@@ -3,12 +3,6 @@ Extended ML error scenarios (ml_err_101 - ml_err_180)
 Adds 20 new errors for each ML category to enhance dataset diversity.
 """
 
-
-# ============================================================
-# Preprocessing & Data Pipelines (ml_err_101 - ml_err_120)
-# ============================================================
-
-
 def ml_err_101():
     """Schema evolution introduces unseen categorical level at inference."""
     import pandas as pd
