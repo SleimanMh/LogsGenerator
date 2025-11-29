@@ -1,5 +1,5 @@
 """
-Python Error Endpoints - 100+ Basic Python Errors
+Python Error Endpoints - 130+ Basic Python Errors
 Covers: Type errors, I/O, string operations, collections, file handling,
 system operations, and basic programming logic errors
 
@@ -9,6 +9,8 @@ Organization:
   - io_errors: I/O and file errors (p_err_46-65)
   - arithmetic_errors: Arithmetic and math errors (p_err_66-85)
   - iteration_errors: Iteration and control flow errors (p_err_86-100)
+  - advanced_errors: Mixed advanced Python errors (p_err_101-130)
+  - test: Additional complex error scenarios (p_err_131-135)
 
 API Endpoints:
   - GET /python/types (25 errors)
@@ -16,6 +18,8 @@ API Endpoints:
   - GET /python/io (20 errors)
   - GET /python/arithmetic (20 errors)
   - GET /python/iteration (15 errors)
+  - GET /python/advanced (30 errors)
+  - GET /python/test (5 errors)
 """
 
 from fastapi import FastAPI
@@ -28,15 +32,17 @@ from . import string_errors
 from . import io_errors
 from . import arithmetic_errors
 from . import iteration_errors
+from . import advanced_errors
+from . import test
 
 
 # Collect all error functions
 PYTHON_ERRORS = {}
 
 # Populate registry
-for module in [types_errors, string_errors, io_errors, arithmetic_errors, iteration_errors]:
+for module in [types_errors, string_errors, io_errors, arithmetic_errors, iteration_errors, advanced_errors, test]:
     for attr_name in dir(module):
-        if attr_name.startswith('p_err_'):
+        if attr_name.startswith("p_err_"):
             PYTHON_ERRORS[attr_name] = getattr(module, attr_name)
 
 
@@ -69,7 +75,7 @@ def _run_error_category(errors_dict: dict, category_name: str) -> dict:
 def register_python_errors(app: FastAPI):
     """Register Python error endpoints"""
     
-    # Extract errors by module
+    # Extract errors by module / numeric ranges
     types_dict = {
         k: v for k, v in PYTHON_ERRORS.items()
         if k.startswith("p_err_") and 1 <= int(k.split('_')[2]) <= 25
@@ -90,7 +96,16 @@ def register_python_errors(app: FastAPI):
         k: v for k, v in PYTHON_ERRORS.items()
         if k.startswith("p_err_") and 86 <= int(k.split('_')[2]) <= 100
     }
+    advanced_dict = {
+        k: v for k, v in PYTHON_ERRORS.items()
+        if k.startswith("p_err_") and 101 <= int(k.split('_')[2]) <= 130
+    }
     
+    test_dict = {
+        k: v for k, v in PYTHON_ERRORS.items() 
+        if 131 <= int(k.split("_")[2]) <= 135
+    }
+
     @app.get("/python/types")
     def python_types():
         """Execute 25 Python type and data structure errors (p_err_01-25)"""
@@ -116,6 +131,16 @@ def register_python_errors(app: FastAPI):
         """Execute 15 Python iteration and control flow errors (p_err_86-100)"""
         return _run_error_category(iteration_dict, "iteration")
     
+    @app.get("/python/advanced")
+    def python_advanced():
+        """Execute 30 advanced Python errors (p_err_101-130)"""
+        return _run_error_category(advanced_dict, "advanced")
+    
+    @app.get("/python/test")
+    def python_custom():
+        """Execute test errors (p_err_131–135)"""
+        return _run_error_category(test_dict, "test")
+    
     @app.get("/python/info")
     def python_info():
         """Get Python errors information"""
@@ -127,9 +152,11 @@ def register_python_errors(app: FastAPI):
                 "/python/strings": 20,
                 "/python/io": 20,
                 "/python/arithmetic": 20,
-                "/python/iteration": 15
+                "/python/iteration": 15,
+                "/python/advanced": 30,
+                "/python/test": 5
             }
         }
 
 
-__all__ = ['register_python_errors', 'PYTHON_ERRORS']
+__all__ = ["register_python_errors", "PYTHON_ERRORS"]

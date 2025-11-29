@@ -19,7 +19,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("⚠️ Error Classification Dataset Generator")
+st.title("⚠️ Error Dataset Generator")
 st.markdown("*Direct API testing for Python, ML, and AI error endpoints*")
 
 # Sidebar for endpoint selection
@@ -39,6 +39,8 @@ endpoints_map = {
         "io": "/python/io",
         "arithmetic": "/python/arithmetic",
         "iteration": "/python/iteration",
+        "advanced": "/python/advanced",
+        "test": "/python/test",
         "info": "/python/info"
     },
     "ML": {
@@ -171,35 +173,36 @@ st.markdown("## 📚 Endpoint Documentation")
 doc_col1, doc_col2, doc_col3 = st.columns(3)
 
 with doc_col1:
-    st.markdown("### Python Errors (100)")
+    st.markdown("### Python Errors")
     st.markdown("""
-- **Types** (25): Type/data structure errors
-- **Strings** (20): Encoding/string errors
-- **I/O** (20): File operation errors
-- **Arithmetic** (20): Math operation errors
-- **Iteration** (15): Loop/control flow errors
+- **Types**: Type/data structure errors
+- **Strings**: Encoding/string errors
+- **I/O**: File operation errors
+- **Arithmetic**: Math operation errors
+- **Iteration**: Loop/control flow errors
+- **Advanced**: Mixed advanced Python errors
     """)
 
 with doc_col2:
-    st.markdown("### ML Errors (200)")
+    st.markdown("### ML Errors")
     st.markdown("""
-- **Preprocessing** (50): Data handling
-- **Training** (50): Model fitting
-- **Metrics** (45): Evaluation errors
-- **Advanced** (35): Complex scenarios
-- **Propagation** (20): Propagation errors                
+- **Preprocessing**: Data handling
+- **Training**: Model fitting
+- **Metrics**: Evaluation errors
+- **Advanced**: Complex scenarios
+- **Propagation**: Propagation errors                
     """)
 
 with doc_col3:
-    st.markdown("### AI Errors (270)")
+    st.markdown("### AI Errors")
     st.markdown("""
-- **Preprocessing** (40): Tensor prep
-- **Vision** (40): CNN/CV errors
-- **Embeddings** (40): NLP/embedding
-- **Autograd** (40): Gradient/RNN
-- **Transformers** (40): Transformer arch
-- **Propagation** (20): Error propagation
-- **DeepLearning** (50): PyTorch/TensorFlow                
+- **Preprocessing**: Tensor prep
+- **Vision**: CNN/CV errors
+- **Embeddings**: NLP/embedding
+- **Autograd**: Gradient/RNN
+- **Transformers**: Transformer arch
+- **Propagation**: Error propagation
+- **DeepLearning**: PyTorch/TensorFlow                
     """)
 
 # Footer
