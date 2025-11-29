@@ -1,4 +1,5 @@
 Error Generation & Testing System
+
 This project provides an environment for generating error logs.
 The system consists of two applications, both launched using docker-compose.
 
